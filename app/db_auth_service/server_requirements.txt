@@ -1,0 +1,7 @@
+sqlalchemy
+
+flask
+python-dotenv
+flask-restful
+flask_sqlalchemy
+flask_jwt_extended
