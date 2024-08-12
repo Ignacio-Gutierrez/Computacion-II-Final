@@ -1,3 +1,4 @@
+from datetime import datetime
 from .. import db
 
 class Matches(db.Model):
@@ -16,7 +17,7 @@ class Matches(db.Model):
             'id': self.id,
             'player1_id': self.player1_id,
             'player2_id': self.player2_id,
-            'game_date': self.game_date,
+            'game_date': self.game_date.isoformat(),
             'winner_id': self.winner_id,
             'loser_id': self.loser_id
         }
@@ -25,10 +26,15 @@ class Matches(db.Model):
     def from_json(matches_json):
         player1_id = matches_json.get('player1_id')
         player2_id = matches_json.get('player2_id')
-        game_date = matches_json.get('game_date')
+        game_date_str = matches_json.get('game_date')
         winner_id = matches_json.get('winner_id')
         loser_id = matches_json.get('loser_id')
 
+        if game_date_str:
+            game_date = datetime.fromisoformat(game_date_str)
+        else:
+            game_date = None
+        
         return Matches(
             player1_id=player1_id,
             player2_id=player2_id,
