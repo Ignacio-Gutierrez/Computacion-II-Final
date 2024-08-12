@@ -9,11 +9,14 @@
 - Enviar y recibir actualizaciones del estado del juego
 
 ## Servidor
+### Servidor DB-Auth 
 - Gestión de registro de usuarios
 - Autenticación de usuarios
+- Almacenamiento de resultados de partidas en la base de datos
+
+### Servidor  Game
 - Emparejamiento de jugadores
 - Manejo de la lógica del juego
-- Almacenamiento de resultados de partidas en la base de datos
 - Gestión de múltiples conexiones de clientes de forma concurrente
 
 ## Base de Datos
