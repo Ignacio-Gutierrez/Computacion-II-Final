@@ -4,18 +4,6 @@ class Connect_4:
         self.board = [[' ' for _ in range(8)] for _ in range(8)]
         self.turns = 0
 
-    def show_board(self):
-        print('\n')
-        for col in range(8):                
-            print(f'  ({col+1}) ', end = '')
-        print('\n')                                
-        
-        for row in range(8):                
-            print('|', end = '')
-            for col in range(8):                                   
-                print(f'  {self.board[row][col]}  |', end = '')
-            print('\n')
-
     def player_turn(self):
         return ['1', '2'][self.turns % 2]
 
