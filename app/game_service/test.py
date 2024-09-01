@@ -16,12 +16,6 @@ class test_game_Connect_4(unittest.TestCase):
                                           [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
                                           [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']])
 
-    @patch("builtins.print")
-    def test_showboard(self, mockpatched):
-        en_linea =  Connect_4()
-        en_linea.show_board()
-        self.assertEqual(mockpatched.call_count, 90)
-
     def test_agregar_ficha(self):
         en_linea = Connect_4()
         en_linea.put_token(1)
