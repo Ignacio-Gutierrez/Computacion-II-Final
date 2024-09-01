@@ -21,30 +21,25 @@ async def handle_client(reader, writer):
     await writer.wait_closed()
 
 async def main():
-    server_ipv4 = await asyncio.start_server(
-        handle_client,
-        '0.0.0.0',
-        8888,
-        family=socket.AF_INET
-    )
-    
-    server_ipv6 = await asyncio.start_server(
-        handle_client,
-        '::',
-        8888,
-        family=socket.AF_INET6
-    )
-    
-    addr_ipv4 = server_ipv4.sockets[0].getsockname()
-    addr_ipv6 = server_ipv6.sockets[0].getsockname()
-    print(f"Servidor escuchando en IPv4: {addr_ipv4}")
-    print(f"Servidor escuchando en IPv6: {addr_ipv6}")
+    addr = ("", 8888)
 
-    async with server_ipv4, server_ipv6:
-        await asyncio.gather(
-            server_ipv4.serve_forever(),
-            server_ipv6.serve_forever()
-        )
+    if socket.has_dualstack_ipv6():
+        s = socket.create_server(addr, family=socket.AF_INET6, dualstack_ipv6=True)
+    else:
+        s = socket.create_server(addr)
 
+    s.setblocking(False)
+
+    server = await asyncio.start_server(
+        handle_client,
+        sock=s
+    )
+
+    addr = server.sockets[0].getsockname()
+    print(f"Servidor escuchando en {addr}")
+
+    async with server:
+        await server.serve_forever()
+        
 if __name__ == '__main__':
     asyncio.run(main())
