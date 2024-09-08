@@ -1,4 +1,3 @@
-import asyncio
 import argparse
 import socket
 
@@ -21,7 +20,7 @@ def telnet_client(username, password, action, ip_version):
         print(f"{response}")
 
         while True:
-            comando = input("Ingresa un comando ('exit' para salir): ")
+            comando = input("=>  ")
             if comando.lower() == 'exit':
                 break
 
@@ -29,7 +28,8 @@ def telnet_client(username, password, action, ip_version):
                 print("Comando inválido, por favor ingresa un número entre 1 y 8")
                 continue
 
-            c_s.sendall(comando.encode())
+            c_s.send(comando.encode())
+
             response = c_s.recv(1024).decode()
             print(f"{response}")
 
