@@ -43,8 +43,7 @@ async def start_game(player1, player2):
 
         # Formatear el tablero para mostrarlo en Telnet
         board_display = format_board_for_display(game.board)
-        current_player.writer.write(f"Tablero actual:\n{board_display}\n".encode())
-        current_player.writer.write(f"Tu turno, Jugador {game.player_turn()}! Selecciona una columna (1-8): ".encode())
+        current_player.writer.write(f"Tablero actual:\n{board_display}\nTu turno, Jugador {game.player_turn()}! Selecciona una columna (1-8) o 'exit' para salir:".encode())
         await current_player.writer.drain()
 
         data = await current_player.reader.read(100)

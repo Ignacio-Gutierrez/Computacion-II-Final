@@ -5,23 +5,35 @@ import socket
 HOST = 'localhost'    
 PORT = 8888
 
-async def connect_to_server(username, password, action, ip_version):
-    if ip_version == 'ipv6':
-        reader, writer = await asyncio.open_connection(HOST, PORT, family=socket.AF_INET6)
+def telnet_client(username, password, action, ip_version):
+
+    if ip_version == 'ipv4':
+        family = socket.AF_INET
     else:
-        reader, writer = await asyncio.open_connection(HOST, PORT, family=socket.AF_INET)
-    
-    print(f"Conectado al servidor {HOST} en el puerto {PORT} usando {ip_version.upper()}.")
+        family = socket.AF_INET6
 
-    while True:
-        data = await reader.read(500)
-        if not data:
-            break
-        print(f"Recibido: {data.decode()}")
+    with socket.socket(family, socket.SOCK_STREAM) as c_s:
 
-    print("Conexión cerrada")
-    writer.close()
-    await writer.wait_closed()
+        c_s.connect((HOST, PORT))
+        print(f"Conectado a {HOST}:{PORT} usando {ip_version.upper()}")
+
+        response = c_s.recv(1024).decode()
+        print(f"{response}")
+
+        while True:
+            comando = input("Ingresa un comando ('exit' para salir): ")
+            if comando.lower() == 'exit':
+                break
+
+            if comando not in [str(i) for i in range(1, 9)]:
+                print("Comando inválido, por favor ingresa un número entre 1 y 8")
+                continue
+
+            c_s.sendall(comando.encode())
+            response = c_s.recv(1024).decode()
+            print(f"{response}")
+
+        print("Desconectando...")
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Cliente Telnet para conectarse al servidor de juego")
@@ -32,9 +44,6 @@ def parse_args():
     
     return parser.parse_args()
 
-async def main():
-    args = parse_args()
-    await connect_to_server(args.username, args.password, args.action, args.ip_version)
-
 if __name__ == '__main__':
-    asyncio.run(main())
+    args = parse_args()
+    telnet_client(args.username, args.password, args.action, args.ip_version)
