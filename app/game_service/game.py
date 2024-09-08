@@ -5,7 +5,7 @@ class Connect_4:
         self.turns = 0
 
     def player_turn(self):
-        return ['1', '2'][self.turns % 2]
+        return ['X', 'O'][self.turns % 2]
 
     def put_token(self, col):
         col -= 1
