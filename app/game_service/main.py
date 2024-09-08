@@ -25,12 +25,12 @@ async def handle_client(reader, writer):
         await start_game(player1, player2)
     
 def format_board_for_display(board):
-    header = "  ".join([f"({i+1})" for i in range(8)])
+    header = " ".join([f"({i+1}) " for i in range(8)])
     rows = []
     for row in board:
-        rows.append(" | ".join(row))
+        rows.append("    |".join(row))
     board_display = "\n".join(rows)
-    return f"  {header}\n{board_display}\n"
+    return f" {header}\n{board_display}\n"
 
 async def start_game(player1, player2):
     game = Connect_4()
