@@ -1,7 +1,6 @@
 from flask import request, Blueprint, abort, jsonify
 from .. import db
 from main.models import UserModel
-from flask_jwt_extended import create_access_token
 
 
 auth = Blueprint('auth', __name__, url_prefix='/auth')
@@ -16,8 +15,7 @@ def login():
     user = db.session.query(UserModel).filter(UserModel.username == data.get("username")).first()
 
     if user and user.validate_pass(data.get("password")):
-        access_token = create_access_token(identity=user.id)
-        return jsonify({'access_token': access_token}), 200
+        return 200
     else:
         abort(401, description="Incorrect username or password.")
     
