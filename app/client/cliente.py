@@ -6,34 +6,45 @@ PORT = 8888
 
 def telnet_client(username, password, action, ip_version):
 
-    if ip_version == 'ipv4':
-        family = socket.AF_INET
-    else:
-        family = socket.AF_INET6
+    try:
+        if ip_version == 'ipv4':
+            family = socket.AF_INET
+        else:
+            family = socket.AF_INET6
 
-    with socket.socket(family, socket.SOCK_STREAM) as c_s:
+        with socket.socket(family, socket.SOCK_STREAM) as c_s:
 
-        c_s.connect((HOST, PORT))
-        print(f"Conectado a {HOST}:{PORT} usando {ip_version.upper()}")
+            c_s.connect((HOST, PORT))
+            print(f"Conectado a {HOST}:{PORT} usando {ip_version.upper()}")
 
-        response = c_s.recv(1024).decode()
-        print(f"{response}")
-
-        while True:
-            comando = input("=>  ")
-            if comando.lower() == 'exit':
-                break
-
-            if comando not in [str(i) for i in range(1, 9)]:
-                print("Comando inválido, por favor ingresa un número entre 1 y 8")
-                continue
-
-            c_s.send(comando.encode())
-
+            credentials = f"{username},{password},{action}"
+            c_s.send(credentials.encode())
+            
             response = c_s.recv(1024).decode()
             print(f"{response}")
 
-        print("Desconectando...")
+            while True:
+                comando = input("=>  ")
+                if comando.lower() == 'exit':
+                    break
+
+                if comando not in [str(i) for i in range(1, 9)]:
+                    print("Comando inválido, por favor ingresa un número entre 1 y 8")
+                    continue
+
+                c_s.send(comando.encode())
+
+                response = c_s.recv(1024).decode()
+                print(f"{response}")
+
+            print("Desconectando...")
+
+    except ConnectionRefusedError:
+        print("No se pudo conectar al servidor. Verifica que esté en ejecución.")
+    except socket.error as e:
+        print(f"Error de socket: {e}")
+    except Exception as e:
+        print(f"Ocurrió un error inesperado: {e}")
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Cliente Telnet para conectarse al servidor de juego")
