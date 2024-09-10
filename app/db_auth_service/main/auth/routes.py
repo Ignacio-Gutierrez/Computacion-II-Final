@@ -15,7 +15,7 @@ def login():
     user = db.session.query(UserModel).filter(UserModel.username == data.get("username")).first()
 
     if user and user.validate_pass(data.get("password")):
-        return 200
+        return jsonify({'message': 'ok'}), 200
     else:
         abort(401, description="Incorrect username or password.")
     
