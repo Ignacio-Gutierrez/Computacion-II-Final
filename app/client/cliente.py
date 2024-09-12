@@ -1,8 +1,16 @@
 import argparse
 import socket
 
-HOST = 'localhost'    
-PORT = 8888
+import os
+import configparser
+
+config_path = os.path.join(os.path.dirname(__file__), 'config.ini')
+
+config = configparser.ConfigParser()
+config.read(config_path)
+
+host = config['server']['host']
+port = int(config['server']['port'])
 
 def telnet_client(username, password, action, ip_version):
 
@@ -14,8 +22,8 @@ def telnet_client(username, password, action, ip_version):
 
         with socket.socket(family, socket.SOCK_STREAM) as c_s:
 
-            c_s.connect((HOST, PORT))
-            print(f"Conectado a {HOST}:{PORT} usando {ip_version.upper()}")
+            c_s.connect((host, port))
+            print(f"Conectado a {host}:{port} usando {ip_version.upper()}")
 
             credentials = f"{username},{password},{action}"
             c_s.send(credentials.encode())
