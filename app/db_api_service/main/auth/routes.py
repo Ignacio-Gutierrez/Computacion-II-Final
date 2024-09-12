@@ -37,4 +37,4 @@ def register():
         except Exception as error:
             db.session.rollback()
             return str(error), 409
-        return jsonify({'message': 'resgistered','user_id': user.id}), 201
+        return jsonify({'message': 'registered','user_id': user.id}), 201
