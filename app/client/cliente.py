@@ -14,6 +14,18 @@ port = int(config['server']['port'])
 
 def telnet_client(username, password, action, ip_version):
 
+    while True:
+        register_status = input("¿Estás registrado? (s/n): ").lower()
+        if register_status == 'n':
+            action = 'register'
+            break
+        elif register_status == 's':
+            print("¡Bienvenido al juego!")
+            break
+        else:
+            print("Entrada no válida. Por favor, ingresa 's' para sí o 'n' para no.")
+            continue
+        
     try:
         if ip_version == 'ipv4':
             family = socket.AF_INET
@@ -21,7 +33,6 @@ def telnet_client(username, password, action, ip_version):
             family = socket.AF_INET6
 
         with socket.socket(family, socket.SOCK_STREAM) as c_s:
-
             c_s.connect((host, port))
             print(f"Conectado a {host}:{port} usando {ip_version.upper()}")
 
@@ -32,6 +43,9 @@ def telnet_client(username, password, action, ip_version):
             print(f"{response}")
 
             while True:
+                response = c_s.recv(1024).decode()
+                print(f"{response}")
+
                 comando = input("=>  ")
                 if comando.lower() == 'exit':
                     break
@@ -41,9 +55,6 @@ def telnet_client(username, password, action, ip_version):
                     continue
 
                 c_s.send(comando.encode())
-
-                response = c_s.recv(1024).decode()
-                print(f"{response}")
 
             print("Desconectando...")
 
@@ -66,3 +77,7 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
     telnet_client(args.username, args.password, args.action, args.ip_version)
+
+# python3 cliente.py -u testuser -p testpassword
+
+# python3 cliente.py -u testuser0 -p testpassword -ip ipv6
