@@ -1,28 +1,63 @@
 import asyncio
 import socket
-from multiprocessing import Pipe
+import os
+import configparser
 
 from game import Connect_4
 
-async_to_db_conn, db_to_async_conn = Pipe()
+config_path = os.path.join(os.path.dirname(__file__), 'config.ini')
+
+config = configparser.ConfigParser()
+config.read(config_path)
+
+host = config['server']['HOST']
+port = int(config['server']['PORT'])
 
 waiting_players = []
 
 class Player:
-    def __init__(self, reader, writer):
+    def __init__(self, reader, writer, username, id):
         self.reader = reader
         self.writer = writer
-        #self.password = password
-        #self.username = username
+        self.username = username
+        self.id = id
 
 
-async def handle_client(reader, writer):
+async def handle_client(reader, writer, game_sender, game_receiver):
     addr = writer.get_extra_info('peername')
     print(f"Jugador conectado desde {addr}")
 
-    new_player = Player(reader, writer)
+    credentials_data = await reader.read(1024)
+    if not credentials_data:
+        print(f"Jugador {addr} se desconectó antes de enviar credenciales.")
+        writer.close()
+        await writer.wait_closed()
+        return
+    
+    credentials = credentials_data.decode().strip()
+    username, password, action = credentials.split(',')
+    print(f"Credenciales recibidas - Usuario: {username}, Acción: {action}")
 
-    waiting_players.append(new_player)
+    if action == 'jugar':
+        register_request = {'action': 'login', 'data': {'username': username, 'password': password}}
+        print(f"Enviando solicitud de autenticación a la base de datos: {register_request}")
+        game_sender.send(register_request)
+        print("Solicitud enviada al pipe")
+
+        register_response = game_receiver.recv()
+        print(f"Respuesta recibida: {register_response}")
+
+        if register_response.get("message") == "ok":
+            writer.write(f"Bienvenido {username}, autenticación exitosa!\n".encode())
+
+            new_player = Player(reader, writer, username, register_response.get("id"))
+            waiting_players.append(new_player)
+
+        elif register_response.get("message") == "incorrect_password":
+            writer.write("Contraseña incorrecta. Desconectando...\n".encode())
+            
+        elif register_response.get("message") == "user_not_found":
+            writer.write("Usuario no encontrado. Desconectando...\n".encode())
 
     if len(waiting_players) >= 2:
         player1 = waiting_players.pop(0)
@@ -81,9 +116,8 @@ async def start_game(player1, player2):
         # Cambiar el turno al otro jugador
         turn = 1 - turn
 
-
-async def main():
-    addr = ("", 8888)
+async def main(game_sender, game_receiver):
+    addr = (host, port)
 
     if socket.has_dualstack_ipv6():
         s = socket.create_server(addr, family=socket.AF_INET6, dualstack_ipv6=True)
@@ -93,7 +127,7 @@ async def main():
     s.setblocking(False)
 
     server = await asyncio.start_server(
-        handle_client,
+        lambda r, w: handle_client(r, w, game_sender, game_receiver),
         sock=s
     )
 
@@ -103,5 +137,5 @@ async def main():
     async with server:
         await server.serve_forever()
 
-def run_async_server():
-    asyncio.run(main())
+def run_async_server(game_sender, game_receiver):
+    asyncio.run(main(game_sender, game_receiver))
