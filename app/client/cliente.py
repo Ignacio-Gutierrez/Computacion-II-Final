@@ -4,6 +4,9 @@ import socket
 import os
 import configparser
 
+import colorama
+colorama.init(autoreset=True)
+
 config_path = os.path.join(os.path.dirname(__file__), 'config.ini')
 
 config = configparser.ConfigParser()
@@ -32,30 +35,57 @@ def telnet_client(username, password, action, ip_version):
             family = socket.AF_INET6
 
         with socket.socket(family, socket.SOCK_STREAM) as c_s:
-            c_s.connect((host, port))
-            print(f"Conectado a {host}:{port} usando {ip_version.upper()}")
 
-            credentials = f"{username},{password},{action}"
-            c_s.send(credentials.encode())
-            
-            response = c_s.recv(1024).decode()
-            print(f"{response}")
+            if action == 'jugar':
+                c_s.connect((host, port))
+                print(f"Conectado a {host}:{port} usando {ip_version.upper()}")
 
-            while True:
+                credentials = f"{username},{password},{action}"
+                c_s.send(credentials.encode())
+                
                 response = c_s.recv(1024).decode()
                 print(f"{response}")
 
-                comando = input("=>  ")
-                if comando.lower() == 'exit':
-                    break
+                while True:
+                    response = c_s.recv(1024).decode()
+                    print(f"{response}")
 
-                if comando not in [str(i) for i in range(1, 9)]:
-                    print("Comando inválido, por favor ingresa un número entre 1 y 8")
-                    continue
+                    comando = input("=>  ")
+                    if comando.lower() == 'exit':
+                        break
 
-                c_s.send(comando.encode())
+                    if comando not in [str(i) for i in range(1, 9)]:
+                        print("Comando inválido, por favor ingresa un número entre 1 y 8")
+                        continue
 
-            print("Desconectando...")
+                    c_s.send(comando.encode())
+
+                print("Desconectando...")
+                c_s.send("exit".encode())
+
+            elif action == 'historial':
+                c_s.connect((host, port))
+                print(f"Conectado a {host}:{port} usando {ip_version.upper()}")
+
+                credentials = f"{username},{password},{action}"
+                c_s.send(credentials.encode())
+                
+                response = c_s.recv(1024).decode()
+                colored_response = response.replace(username, f"{colorama.Fore.CYAN}{username}{colorama.Style.RESET_ALL}")
+
+                print(f"{colored_response}")
+
+                while True:
+                    comando = input("Para salir escriba 'exit': ")
+                    if comando.lower() == 'exit':
+                        c_s.send("exit".encode())
+                        break
+                
+                print("Desconectando...")
+
+            else:
+                print("Acción no válida. Por favor, ingresa 'jugar' o 'historial'")
+                return
 
     except ConnectionRefusedError:
         print("No se pudo conectar al servidor. Verifica que esté en ejecución.")
