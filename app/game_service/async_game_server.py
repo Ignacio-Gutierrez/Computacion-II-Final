@@ -81,7 +81,9 @@ async def handle_client(reader, writer, game_sender, game_receiver):
         history_request = {'action': 'history', 'data': {username}}
         game_sender.send(history_request)
         print("Solicitud enviada al pipe")
-        
+        history = game_receiver.recv()
+        writer.write(f"Historial de partidas de {username}:\n{history}\n".encode())
+
     if len(waiting_players) >= 2:
         player1 = waiting_players.pop(0)
         player2 = waiting_players.pop(0)
