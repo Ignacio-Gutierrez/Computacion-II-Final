@@ -81,7 +81,9 @@ async def handle_client(reader, writer, game_sender, game_receiver):
         history_request = {'action': 'history', 'data': {username}}
         game_sender.send(history_request)
         print("Solicitud enviada al pipe")
-        history = game_receiver.recv()
+        history_recv = game_receiver.recv()
+        history = format_history_for_display(history_recv.get("matches"))
+        print(f"Historial de partidas de {username}:\n{history}")
         writer.write(f"Historial de partidas de {username}:\n{history}\n".encode())
 
     if len(waiting_players) >= 2:
@@ -97,6 +99,12 @@ def format_board_for_display(board):
         rows.append("    |".join(row))
     board_display = "\n".join(rows)
     return f" {header}\n{board_display}\n"
+
+def format_history_for_display(history):
+    formatted_history = []
+    for game in history:
+        formatted_history.append(f"Partida {game.get('id')} | Fecha {game.get('game_date')}- Jugador 1: {game.get('player1_name')} vs Jugador 2: {game.get('player2_name')} - Ganador: {game.get('winner_name')}")
+    return "\n".join(formatted_history)
 
 async def start_game(player1, player2):
     game = Connect_4()
