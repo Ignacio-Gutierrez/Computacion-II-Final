@@ -20,7 +20,6 @@ def telnet_client(username, password, action, ip_version):
             action = 'register'
             break
         elif register_status == 's':
-            print("¡Bienvenido al juego!")
             break
         else:
             print("Entrada no válida. Por favor, ingresa 's' para sí o 'n' para no.")
