@@ -55,10 +55,33 @@ async def handle_client(reader, writer, game_sender, game_receiver):
 
         elif register_response.get("message") == "incorrect_password":
             writer.write("Contraseña incorrecta. Desconectando...\n".encode())
-            
+
         elif register_response.get("message") == "user_not_found":
             writer.write("Usuario no encontrado. Desconectando...\n".encode())
 
+    elif action == 'register':
+        register_request = {'action': 'register', 'data': {'username': username, 'password': password}}
+        print(f"Enviando solicitud de registro a la base de datos: {register_request}")
+        game_sender.send(register_request)
+        print("Solicitud enviada al pipe")
+        
+        register_response = game_receiver.recv()
+        print(f"Respuesta recibida: {register_response}")
+
+        if register_response.get("message") == "registered":
+            writer.write(f"Registro exitoso, {username}! Ahora puedes jugar.\n".encode())
+
+            new_player = Player(reader, writer, username, register_response.get("id"))
+            waiting_players.append(new_player)
+
+        elif register_response.get("message") == "duplicated_username":
+            writer.write("Usuario ya existe. Desconectando...\n".encode())
+
+    elif action == 'historial':
+        history_request = {'action': 'history', 'data': {username}}
+        game_sender.send(history_request)
+        print("Solicitud enviada al pipe")
+        
     if len(waiting_players) >= 2:
         player1 = waiting_players.pop(0)
         player2 = waiting_players.pop(0)
