@@ -37,8 +37,9 @@ def connect_to_db(db_sender, db_receiver):
                     print(f"Respuesta de guardado de partida: {response_data}")
 
                 elif action == 'history':
-                    player = next(iter(data))
-                    response = requests.get(f'http://{host}:{port}/matches?player={player}')
+                    player = data['username']
+                    page = data['page']
+                    response = requests.get(f'http://{host}:{port}/matches?page={page}&player={player}')
                     response.raise_for_status()
                     response_data = response.json()
                     print(f"Respuesta de historial de partidas: {response_data}")

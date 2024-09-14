@@ -73,18 +73,21 @@ def telnet_client(username, password, action, ip_version):
                 credentials = f"{username},{password},{action}"
                 c_s.send(credentials.encode())
                 
-                response = c_s.recv(2048).decode()
-                pattern = rf'\b{re.escape(username)}\b'
-                colored_response = re.sub(pattern, f"{colorama.Fore.CYAN}{username}{colorama.Style.RESET_ALL}", response)
-
-                print(f"{colored_response}")
-
                 while True:
-                    comando = input("Para salir escriba 'exit': ")
+                    response = c_s.recv(2048).decode()
+                    pattern = rf'\b{re.escape(username)}\b'
+                    colored_response = re.sub(pattern, f"{colorama.Fore.CYAN}{username}{colorama.Style.RESET_ALL}", response)
+
+                    print(f"{colored_response}")
+
+                    print("\nPara salir escriba 'exit'")
+                    comando = input("Para cambiar de página, ingresa número de página: ")
                     if comando.lower() == 'exit':
                         c_s.send("exit".encode())
                         break
-                
+                    elif comando.isdigit():
+                        c_s.send(comando.encode())
+
                 print("Desconectando...")
 
             else:

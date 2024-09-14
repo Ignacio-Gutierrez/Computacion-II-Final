@@ -49,15 +49,18 @@ async def handle_client(reader, writer, game_sender, game_receiver):
 
         if register_response.get("message") == "ok":
             writer.write(f"Bienvenido {username}, autenticación exitosa!\n".encode())
+            await writer.drain()
 
             new_player = Player(reader, writer, username, register_response.get("id"))
             waiting_players.append(new_player)
 
         elif register_response.get("message") == "incorrect_password":
             writer.write("Contraseña incorrecta. Desconectando...\n".encode())
+            await writer.drain()
 
         elif register_response.get("message") == "user_not_found":
             writer.write("Usuario no encontrado. Desconectando...\n".encode())
+            await writer.drain()
 
     elif action == 'register':
         register_request = {'action': 'register', 'data': {'username': username, 'password': password}}
@@ -70,22 +73,52 @@ async def handle_client(reader, writer, game_sender, game_receiver):
 
         if register_response.get("message") == "registered":
             writer.write(f"Registro exitoso, {username}! Ahora puedes jugar.\n".encode())
+            await writer.drain()
 
             new_player = Player(reader, writer, username, register_response.get("id"))
             waiting_players.append(new_player)
 
         elif register_response.get("message") == "duplicated_username":
             writer.write("Usuario ya existe. Desconectando...\n".encode())
+            await writer.drain()
 
     elif action == 'historial':
-        history_request = {'action': 'history', 'data': {username}}
+        page = 1
+        history_request = {'action': 'history', 'data': {'username': username, 'page': page}}
         game_sender.send(history_request)
         print("Solicitud enviada al pipe")
+
         history_recv = game_receiver.recv()
+        pages = history_recv.get("pages")
+
         history = format_history_for_display(history_recv.get("matches"))
         print(f"Historial de partidas de {username}:\n{history}")
-        writer.write(f"Historial de partidas de {username}:\n{history}\n".encode())
+        writer.write(f"Historial de partidas de {username}:\n{history}\n\n- Página {page} de [{pages}].".encode())
+        await writer.drain()
+        
+        while True:
 
+            page_request = await reader.read(100)
+
+            if page_request.lower() == 'exit':
+                break
+
+            if page_request.isdigit() and 1 <= int(page_request) <= pages:
+                page = int(page_request)
+
+                history_request = {'action': 'history', 'data': {'username': username, 'page': page}}
+                game_sender.send(history_request)
+                history_recv = game_receiver.recv()
+                pages = history_recv.get("pages")
+                
+                history = format_history_for_display(history_recv.get("matches"))
+                print(f"Historial de partidas de {username}:\n{history}")
+                writer.write(f"Historial de partidas de {username}:\n{history}\n\n- Página {page} de [{pages}].".encode())
+                await writer.drain()
+            else:
+                writer.write(f"Número de página inválido. Por favor, introduce un número entre 1 y {pages}.\n".encode())
+                await writer.drain()
+        
     if len(waiting_players) >= 2:
         player1 = waiting_players.pop(0)
         player2 = waiting_players.pop(0)
