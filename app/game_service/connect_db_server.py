@@ -52,10 +52,3 @@ def connect_to_db(db_sender, db_receiver):
             print(f"Respuesta enviada a async_game_server: {response_data}")
         else:
             continue
-
-#ACCIONES DE LA BASE DE DATOS: login, register, history, save_match
-
-#Ejemplo de mensaje para LOGIN
-# {
-#     "message": "ok"
-# }
