@@ -3,7 +3,7 @@ import socket
 import os
 import configparser
 
-import datetime 
+from datetime import datetime
 
 from game import Connect_4
 
@@ -53,7 +53,7 @@ async def handle_client(reader, writer, game_sender, game_receiver):
             writer.write(f"Bienvenido {username}, autenticación exitosa!\n".encode())
             await writer.drain()
 
-            new_player = Player(reader, writer, username, register_response.get("id"))
+            new_player = Player(reader, writer, username, register_response.get("user_id"))
             waiting_players.append(new_player)
 
         elif register_response.get("message") == "incorrect_password":
@@ -77,7 +77,7 @@ async def handle_client(reader, writer, game_sender, game_receiver):
             writer.write(f"Registro exitoso, {username}! Ahora puedes jugar.\n".encode())
             await writer.drain()
 
-            new_player = Player(reader, writer, username, register_response.get("id"))
+            new_player = Player(reader, writer, username, register_response.get("user_id"))
             waiting_players.append(new_player)
 
         elif register_response.get("message") == "duplicated_username":
@@ -202,7 +202,28 @@ async def start_game(player1, player2, game_sender, game_receiver):
             current_player.writer.write(f"Tablero final:\n{board_display}\n{game_status}\n".encode())
             opponent_player.writer.write(f"Tablero final:\n{board_display}\n{game_status}\n".encode())
             await current_player.writer.drain()
-            await opponent_player.writer.drain()            
+            await opponent_player.writer.drain()
+
+            if "El Jugador X ganó" in game_status:
+                winner_id = current_player.id
+                loser_id = opponent_player.id
+            else:
+                winner_id = opponent_player.id
+                loser_id = current_player.id
+            
+            finished_game = {
+                'action': 'save_match',
+                'data': {
+                    "player1_id": current_player.id,
+                    "player2_id": opponent_player.id,
+                    "game_date": datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),
+                    "winner_id": winner_id,
+                    "loser_id": loser_id
+                }
+            }
+            game_sender.send(finished_game)
+            saved_game = game_receiver.recv()
+            
             break
 
         # Cambiar el turno al otro jugador
