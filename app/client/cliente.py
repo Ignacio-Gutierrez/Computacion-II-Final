@@ -77,7 +77,7 @@ def telnet_client(username, password, action, ip_version):
                 pattern = rf'\b{re.escape(username)}\b'
                 colored_response = re.sub(pattern, f"{colorama.Fore.CYAN}{username}{colorama.Style.RESET_ALL}", response)
 
-                print(f"{response}")
+                print(f"{colored_response}")
 
                 while True:
                     comando = input("Para salir escriba 'exit': ")
