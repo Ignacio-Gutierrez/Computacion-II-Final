@@ -93,17 +93,26 @@ async def handle_client(reader, writer, game_sender, game_receiver):
         await start_game(player1, player2)
     
 def format_board_for_display(board):
-    header = " ".join([f"({i+1}) " for i in range(8)])
-    rows = []
+    header = "|".join([f"[{i+1}]".center(5) for i in range(8)])
+
+    formatted_board_display = [header]
+
     for row in board:
-        rows.append("    |".join(row))
-    board_display = "\n".join(rows)
-    return f" {header}\n{board_display}\n"
+        formatted_row = "" + "|".join([cell.center(5) for cell in row])
+        formatted_board_display.append(formatted_row)
+    
+    return "\n".join(formatted_board_display)
 
 def format_history_for_display(history):
-    formatted_history = []
-    for game in history:
-        formatted_history.append(f"Partida {game.get('id')} | Fecha {game.get('game_date')}- Jugador 1: {game.get('player1_name')} vs Jugador 2: {game.get('player2_name')} - Ganador: {game.get('winner_name')}")
+    header = f"{'N°'.ljust(5)} | {'Fecha'.ljust(25)} | {'Jugador 1'.ljust(20)} | {'Jugador 2'.ljust(20)} | {'Ganador'.ljust(20)}"
+    separator = "-" * len(header)
+
+    formatted_history = [header, separator]
+
+    for index, game in enumerate(history, start=1):
+        row = f"{index}".ljust(5) + f" | {game.get('game_date')}".ljust(25) + f" | {game.get('player1_name')}".ljust(20) + f" | {game.get('player2_name')}".ljust(20) + f" | {game.get('winner_name')}".ljust(20)
+        formatted_history.append(row)
+
     return "\n".join(formatted_history)
 
 async def start_game(player1, player2):
