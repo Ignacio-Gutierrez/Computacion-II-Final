@@ -4,6 +4,7 @@ import socket
 import os
 import configparser
 
+import re
 import colorama
 colorama.init(autoreset=True)
 
@@ -71,7 +72,8 @@ def telnet_client(username, password, action, ip_version):
                 c_s.send(credentials.encode())
                 
                 response = c_s.recv(1024).decode()
-                colored_response = response.replace(username, f"{colorama.Fore.CYAN}{username}{colorama.Style.RESET_ALL}")
+                pattern = rf'\b{re.escape(username)}\b'
+                colored_response = re.sub(pattern, f"{colorama.Fore.CYAN}{username}{colorama.Style.RESET_ALL}", response)
 
                 print(f"{colored_response}")
 
