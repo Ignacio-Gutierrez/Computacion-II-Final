@@ -49,6 +49,8 @@ def telnet_client(username, password, action, ip_version):
 
                 while True:
                     response = c_s.recv(1024).decode()
+                    response = response.replace('X', f"{colorama.Fore.CYAN + colorama.Style.BRIGHT}X{colorama.Style.RESET_ALL}")
+                    response = response.replace('O', f"{colorama.Fore.MAGENTA + colorama.Style.BRIGHT}O{colorama.Style.RESET_ALL}")
                     print(f"{response}")
 
                     comando = input("=>  ")
@@ -71,11 +73,11 @@ def telnet_client(username, password, action, ip_version):
                 credentials = f"{username},{password},{action}"
                 c_s.send(credentials.encode())
                 
-                response = c_s.recv(1024).decode()
+                response = c_s.recv(2048).decode()
                 pattern = rf'\b{re.escape(username)}\b'
                 colored_response = re.sub(pattern, f"{colorama.Fore.CYAN}{username}{colorama.Style.RESET_ALL}", response)
 
-                print(f"{colored_response}")
+                print(f"{response}")
 
                 while True:
                     comando = input("Para salir escriba 'exit': ")
