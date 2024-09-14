@@ -3,6 +3,8 @@ import socket
 import os
 import configparser
 
+import datetime 
+
 from game import Connect_4
 
 config_path = os.path.join(os.path.dirname(__file__), 'config.ini')
@@ -123,7 +125,7 @@ async def handle_client(reader, writer, game_sender, game_receiver):
         player1 = waiting_players.pop(0)
         player2 = waiting_players.pop(0)
         print("Partida iniciada entre dos jugadores")
-        await start_game(player1, player2)
+        await start_game(player1, player2, game_sender, game_receiver)
     
 def format_board_for_display(board):
     header = "|".join([f"[{i+1}]".center(5) for i in range(8)])
@@ -154,7 +156,7 @@ def format_history_for_display(history):
 
     return "\n".join(formatted_history)
 
-async def start_game(player1, player2):
+async def start_game(player1, player2, game_sender, game_receiver):
     game = Connect_4()
     players = [player1, player2]
     turn = 0
@@ -170,10 +172,19 @@ async def start_game(player1, player2):
 
         data = await current_player.reader.read(100)
         if not data:
-            raise ConnectionError("Jugador desconectado")
+            opponent_player.writer.write(f"El jugador {current_player.name} se ha desconectado. Fin del juego.\n".encode())
+            await opponent_player.writer.drain()
+            break
 
         user_move = data.decode().strip()
 
+        if user_move.lower() == "exit":
+                current_player.writer.write(f"Te has retirado del juego.\n".encode())
+                opponent_player.writer.write(f"El jugador {current_player.name} se ha retirado del juego.\n".encode())
+                await current_player.writer.drain()
+                await opponent_player.writer.drain()
+                break
+    
         try:
             valid_move = game.put_token(int(user_move))
             if not valid_move:
@@ -191,7 +202,7 @@ async def start_game(player1, player2):
             current_player.writer.write(f"Tablero final:\n{board_display}\n{game_status}\n".encode())
             opponent_player.writer.write(f"Tablero final:\n{board_display}\n{game_status}\n".encode())
             await current_player.writer.drain()
-            await opponent_player.writer.drain()
+            await opponent_player.writer.drain()            
             break
 
         # Cambiar el turno al otro jugador
