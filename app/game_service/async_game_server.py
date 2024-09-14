@@ -110,7 +110,13 @@ def format_history_for_display(history):
     formatted_history = [header, separator]
 
     for index, game in enumerate(history, start=1):
-        row = f"{index}".ljust(5) + f" | {game.get('game_date')}".ljust(25) + f" | {game.get('player1_name')}".ljust(20) + f" | {game.get('player2_name')}".ljust(20) + f" | {game.get('winner_name')}".ljust(20)
+        row = (
+            f"{index}".ljust(5) + " | " +
+            f"{game.get('game_date')}".ljust(25) + " | " +
+            f"{game.get('player1_name')}".ljust(20) + " | " +
+            f"{game.get('player2_name')}".ljust(20) + " | " +
+            f"{game.get('winner_name')}".ljust(20)
+        )
         formatted_history.append(row)
 
     return "\n".join(formatted_history)
