@@ -44,9 +44,24 @@ def connect_to_db(db_sender, db_receiver):
                     response_data = response.json()
                     print(f"Respuesta de historial de partidas: {response_data}")
 
+            except requests.HTTPError as e:
+                if response.status_code == 409:
+                    response_data = response.json()
+                    if response_data.get("message") == "duplicated_username":
+                        print("Error: nombre de usuario duplicado.")
+                        response_data = {"message": "duplicated_username"}
+                    else:
+                        print(f"Error desconocido: {e}")
+                        response_data = {"message": "error", "details": str(e)}
+                else:
+                    print(f"Error en la autenticación: {e}")
+                    response_data = {"message": "error", "details": str(e)}
             except requests.RequestException as e:
                 print(f"Error en la autenticación: {e}")
                 response_data = {"message": "error", "details": str(e)}
+            except ValueError:
+                print("Respuesta inválida del servidor (no es JSON válido).")
+                response_data = {"message": "error", "details": "Invalid JSON response"}
 
             db_sender.send(response_data)
             print(f"Respuesta enviada a async_game_server: {response_data}")
