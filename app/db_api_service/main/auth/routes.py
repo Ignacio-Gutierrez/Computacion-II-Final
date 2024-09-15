@@ -1,7 +1,6 @@
 from flask import request, Blueprint, abort, jsonify
 from .. import db
 from main.models import UserModel
-from flask_jwt_extended import create_access_token
 
 
 auth = Blueprint('auth', __name__, url_prefix='/auth')
@@ -11,15 +10,18 @@ def login():
     data = request.get_json()
 
     if not data or not data.get("username") or not data.get("password"):
-        abort(400, description="Missing input parameters.")
+        return jsonify({'message': 'missing_parameters'}), 400
 
     user = db.session.query(UserModel).filter(UserModel.username == data.get("username")).first()
 
+    if not user:
+        return jsonify({'message': 'user_not_found'}), 404
+    
+    if not user.validate_pass(data.get("password")):
+        return jsonify({'message': 'incorrect_password'}), 401
+    
     if user and user.validate_pass(data.get("password")):
-        access_token = create_access_token(identity=user.id)
-        return jsonify({'access_token': access_token}), 200
-    else:
-        abort(401, description="Incorrect username or password.")
+        return jsonify({'message': 'ok', 'user_id': user.id}), 200
     
     
 @auth.route('/register' , methods=['POST'])
@@ -27,7 +29,7 @@ def register():
     user = UserModel.from_json(request.get_json())
     exists = db.session.query(UserModel).filter(UserModel.username == user.username).scalar() is not None
     if exists:
-        return 'Duplicated username', 409
+        return jsonify({'message': 'duplicated_username'}), 409
     else:
         try:
             db.session.add(user)
@@ -35,4 +37,4 @@ def register():
         except Exception as error:
             db.session.rollback()
             return str(error), 409
-        return user.to_json(), 201
+        return jsonify({'message': 'registered','user_id': user.id}), 201

@@ -14,7 +14,7 @@ class Match(Resource):
 class Matches(Resource):
     def get(self):
         page = request.args.get('page', default=1, type=int)
-        per_page = request.args.get('per_page', default=10, type=int)
+        per_page = request.args.get('per_page', default=15, type=int)
         winner_name = request.args.get('winner', type=str)
         loser_name = request.args.get('loser', type=str)
         player_name = request.args.get('player', type=str)
