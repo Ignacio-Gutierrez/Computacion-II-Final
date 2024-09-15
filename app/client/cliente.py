@@ -96,6 +96,37 @@ def telnet_client(username, password, action, ip_version):
 
                 print("Desconectando...")
 
+            elif action == 'register':
+                c_s.connect((host, port))
+                print(f"Conectado a {host}:{port} usando {ip_version.upper()}")
+
+                credentials = f"{username},{password},{action}"
+                c_s.send(credentials.encode())
+                
+                response = c_s.recv(1024).decode()
+                print(f"{response}")
+
+                while True:
+                    response = c_s.recv(1024).decode()
+                    response = response.replace('X', f"{colorama.Fore.CYAN + colorama.Style.BRIGHT}X{colorama.Style.RESET_ALL}")
+                    response = response.replace('O', f"{colorama.Fore.MAGENTA + colorama.Style.BRIGHT}O{colorama.Style.RESET_ALL}")
+                    print(f"{response}")
+
+                    clear_input_buffer()
+
+                    comando = input("--->  ")
+                    if comando.lower() == 'exit':
+                        break
+
+                    if comando not in [str(i) for i in range(1, 9)]:
+                        print("Comando inválido, por favor ingresa un número entre 1 y 8")
+                        continue
+
+                    c_s.send(comando.encode())
+
+                print("Desconectando...")
+                c_s.send("exit".encode())
+
             else:
                 print("Acción no válida. Por favor, ingresa 'jugar' o 'historial'")
                 return
