@@ -6,7 +6,6 @@ import configparser
 
 import sys
 import termios
-import tty
 
 import re
 import colorama
@@ -40,96 +39,101 @@ def telnet_client(username, password, action, ip_version):
             family = socket.AF_INET6
 
         with socket.socket(family, socket.SOCK_STREAM) as c_s:
+            
+            if action in ['jugar', 'historial', 'register']:
 
-            if action == 'jugar':
                 c_s.connect((host, port))
                 print(f"Conectado a {host}:{port} usando {ip_version.upper()}")
 
                 credentials = f"{username},{password},{action}"
                 c_s.send(credentials.encode())
-                
+            
                 response = c_s.recv(1024).decode()
                 print(f"{response}")
-
-                while True:
-                    response = c_s.recv(1024).decode()
-                    response = response.replace('X', f"{colorama.Fore.CYAN + colorama.Style.BRIGHT}X{colorama.Style.RESET_ALL}")
-                    response = response.replace('O', f"{colorama.Fore.MAGENTA + colorama.Style.BRIGHT}O{colorama.Style.RESET_ALL}")
-                    print(f"{response}")
-
-                    clear_input_buffer()
-
-                    comando = input("--->  ")
-                    if comando.lower() == 'exit':
-                        break
-
-                    if comando not in [str(i) for i in range(1, 9)]:
-                        print("Comando inválido, por favor ingresa un número entre 1 y 8")
-                        continue
-
-                    c_s.send(comando.encode())
-
-                print("Desconectando...")
-                c_s.send("exit".encode())
-
-            elif action == 'historial':
-                c_s.connect((host, port))
-                print(f"Conectado a {host}:{port} usando {ip_version.upper()}")
-
-                credentials = f"{username},{password},{action}"
-                c_s.send(credentials.encode())
                 
-                while True:
-                    response = c_s.recv(2048).decode()
-                    pattern = rf'\b{re.escape(username)}\b'
-                    colored_response = re.sub(pattern, f"{colorama.Fore.CYAN}{username}{colorama.Style.RESET_ALL}", response)
+                if action == 'jugar':
+                    print("Esperando a otro jugador...\n")
 
-                    print(f"{colored_response}")
+                    while True:
+                        response = c_s.recv(1024).decode()
+                        response = response.replace('X', f"{colorama.Fore.CYAN + colorama.Style.BRIGHT}X{colorama.Style.RESET_ALL}")
+                        response = response.replace('O', f"{colorama.Fore.MAGENTA + colorama.Style.BRIGHT}O{colorama.Style.RESET_ALL}")
+                        print(f"{response}")
 
-                    print("\nPara salir escriba 'exit'")
-                    comando = input("Para cambiar de página, ingresa número de página: ")
-                    if comando.lower() == 'exit':
-                        c_s.send("exit".encode())
-                        break
-                    elif comando.isdigit():
+                        clear_input_buffer()
+
+                        if 'ganó' in response:
+                            break
+
+                        comando = input("--->  ")
+                        if comando.lower() == 'exit':
+                            break
+
+                        if comando not in [str(i) for i in range(1, 9)]:
+                            print("Comando inválido, por favor ingresa un número entre 1 y 8")
+                            continue
+
                         c_s.send(comando.encode())
 
-                print("Desconectando...")
+                    print("Desconectando...")
 
-            elif action == 'register':
-                c_s.connect((host, port))
-                print(f"Conectado a {host}:{port} usando {ip_version.upper()}")
+                    c_s.send("exit".encode())
 
-                credentials = f"{username},{password},{action}"
-                c_s.send(credentials.encode())
-                
-                response = c_s.recv(1024).decode()
-                print(f"{response}")
-
-                while True:
+                elif action == 'register':
+                    
                     response = c_s.recv(1024).decode()
-                    response = response.replace('X', f"{colorama.Fore.CYAN + colorama.Style.BRIGHT}X{colorama.Style.RESET_ALL}")
-                    response = response.replace('O', f"{colorama.Fore.MAGENTA + colorama.Style.BRIGHT}O{colorama.Style.RESET_ALL}")
                     print(f"{response}")
 
-                    clear_input_buffer()
+                    if "Usuario ya existe." in response:
+                        c_s.send("exit".encode())
 
-                    comando = input("--->  ")
-                    if comando.lower() == 'exit':
-                        break
+                    print("Esperando a otro jugador...\n")
 
-                    if comando not in [str(i) for i in range(1, 9)]:
-                        print("Comando inválido, por favor ingresa un número entre 1 y 8")
-                        continue
+                    while True:
+                        response = c_s.recv(1024).decode()
+                        response = response.replace('X', f"{colorama.Fore.CYAN + colorama.Style.BRIGHT}X{colorama.Style.RESET_ALL}")
+                        response = response.replace('O', f"{colorama.Fore.MAGENTA + colorama.Style.BRIGHT}O{colorama.Style.RESET_ALL}")
+                        print(f"{response}")
 
-                    c_s.send(comando.encode())
+                        clear_input_buffer()
 
-                print("Desconectando...")
-                c_s.send("exit".encode())
+                        if 'ganó' in response:
+                            break
+
+                        comando = input("--->  ")
+                        if comando.lower() == 'exit':
+                            break
+
+                        if comando not in [str(i) for i in range(1, 9)]:
+                            print("Comando inválido, por favor ingresa un número entre 1 y 8")
+                            continue
+
+                        c_s.send(comando.encode())
+
+                    print("Desconectando...")
+
+
+                elif action == 'historial':
+                    
+                    while True:
+                        response = c_s.recv(2048).decode()
+                        pattern = rf'\b{re.escape(username)}\b'
+                        colored_response = re.sub(pattern, f"{colorama.Fore.CYAN}{username}{colorama.Style.RESET_ALL}", response)
+
+                        print(f"{colored_response}")
+
+                        print("\nPara salir escriba 'exit'")
+                        comando = input("Para cambiar de página, ingresa número de página: ")
+                        if comando.lower() == 'exit':
+                            c_s.send("exit".encode())
+                            break
+                        elif comando.isdigit():
+                            c_s.send(comando.encode())
+
+                    print("Desconectando...")
 
             else:
                 print("Acción no válida. Por favor, ingresa 'jugar' o 'historial'")
-                return
 
     except ConnectionRefusedError:
         print("No se pudo conectar al servidor. Verifica que esté en ejecución.")
@@ -137,7 +141,10 @@ def telnet_client(username, password, action, ip_version):
         print(f"Error de socket: {e}")
     except Exception as e:
         print(f"Ocurrió un error inesperado: {e}")
-
+    finally:
+        if c_s:
+            c_s.close()
+            
 def clear_input_buffer():
     termios.tcflush(sys.stdin, termios.TCIFLUSH)
 
