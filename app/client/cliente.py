@@ -4,6 +4,10 @@ import socket
 import os
 import configparser
 
+import sys
+import termios
+import tty
+
 import re
 import colorama
 colorama.init(autoreset=True)
@@ -53,7 +57,9 @@ def telnet_client(username, password, action, ip_version):
                     response = response.replace('O', f"{colorama.Fore.MAGENTA + colorama.Style.BRIGHT}O{colorama.Style.RESET_ALL}")
                     print(f"{response}")
 
-                    comando = input("=>  ")
+                    clear_input_buffer()
+
+                    comando = input("--->  ")
                     if comando.lower() == 'exit':
                         break
 
@@ -100,6 +106,9 @@ def telnet_client(username, password, action, ip_version):
         print(f"Error de socket: {e}")
     except Exception as e:
         print(f"Ocurrió un error inesperado: {e}")
+
+def clear_input_buffer():
+    termios.tcflush(sys.stdin, termios.TCIFLUSH)
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Cliente Telnet para conectarse al servidor de juego")
