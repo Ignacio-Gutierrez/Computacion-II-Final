@@ -15,6 +15,8 @@ config.read(config_path)
 host = config['server']['HOST']
 port = int(config['server']['PORT'])
 
+player_lock = asyncio.Lock()
+
 waiting_players = []
 
 class Player:
@@ -54,7 +56,11 @@ async def handle_client(reader, writer, game_sender, game_receiver):
             await writer.drain()
 
             new_player = Player(reader, writer, username, register_response.get("user_id"))
-            waiting_players.append(new_player)
+
+            async with player_lock:
+                waiting_players.append(new_player)
+                print(f"Jugador {new_player.username} añadido a la lista de espera.")
+
 
         elif register_response.get("message") == "incorrect_password":
             writer.write("Contraseña incorrecta. Desconectando...\n".encode())
@@ -69,7 +75,7 @@ async def handle_client(reader, writer, game_sender, game_receiver):
         print(f"Enviando solicitud de registro a la base de datos: {register_request}")
         game_sender.send(register_request)
         print("Solicitud enviada al pipe")
-        
+
         register_response = game_receiver.recv()
         print(f"Respuesta recibida: {register_response}")
 
@@ -78,7 +84,11 @@ async def handle_client(reader, writer, game_sender, game_receiver):
             await writer.drain()
 
             new_player = Player(reader, writer, username, register_response.get("user_id"))
-            waiting_players.append(new_player)
+            
+            async with player_lock:
+                waiting_players.append(new_player)
+                print(f"Jugador {new_player.username} añadido a la lista de espera.")
+
 
         elif register_response.get("message") == "duplicated_username":
             writer.write("Usuario ya existe. Desconectando...\n".encode())
@@ -121,11 +131,13 @@ async def handle_client(reader, writer, game_sender, game_receiver):
                 writer.write(f"Número de página inválido. Por favor, introduce un número entre 1 y {pages}.\n".encode())
                 await writer.drain()
         
-    if len(waiting_players) >= 2:
-        player1 = waiting_players.pop(0)
-        player2 = waiting_players.pop(0)
-        print("Partida iniciada entre dos jugadores")
-        await start_game(player1, player2, game_sender, game_receiver)
+    async with player_lock:
+        if len(waiting_players) >= 2:
+            player1 = waiting_players.pop(0)
+            player2 = waiting_players.pop(0)
+            print(f"Partida iniciada entre {player1.username} y {player2.username}")
+            await start_game(player1, player2, game_sender, game_receiver)
+
     
 def format_board_for_display(board):
     header = "|".join([f"[{i+1}]".center(5) for i in range(8)])
