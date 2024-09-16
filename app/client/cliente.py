@@ -51,8 +51,13 @@ def telnet_client(username, password, action, ip_version):
                 response = c_s.recv(1024).decode()
                 print(f"{response}")
                 
+
                 if action == 'jugar':
-                    print("Esperando a otro jugador...\n")
+
+                    if 'Desconectando' in response:
+                        c_s.send("exit".encode())
+                    else:
+                        print("Esperando a otro jugador...\n")
 
                     while True:
                         response = c_s.recv(1024).decode()
@@ -62,7 +67,7 @@ def telnet_client(username, password, action, ip_version):
 
                         clear_input_buffer()
 
-                        if 'ganó' in response or 'retirado del juego' in response or 'desconectado' in response:
+                        if 'Desconectando' in response:
                             break
 
                         while True:
@@ -100,7 +105,7 @@ def telnet_client(username, password, action, ip_version):
 
                         clear_input_buffer()
 
-                        if 'ganó' in response or 'retirado del juego' in response or 'desconectado' in response:
+                        if 'Desconectando' in response:
                             break
                         
                         while True:
@@ -148,13 +153,13 @@ def telnet_client(username, password, action, ip_version):
     except ConnectionRefusedError:
         print("No se pudo conectar al servidor. Verifica que esté en ejecución.")
     except socket.error as e:
-        print(f"Error de socket: {e}")
+        print(f"El servidor ha cerrado la conexión")
     except Exception as e:
         print(f"Ocurrió un error inesperado: {e}")
     finally:
         if c_s:
             c_s.close()
-            
+
 def clear_input_buffer():
     termios.tcflush(sys.stdin, termios.TCIFLUSH)
 

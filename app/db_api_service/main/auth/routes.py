@@ -24,17 +24,23 @@ def login():
         return jsonify({'message': 'ok', 'user_id': user.id}), 200
     
     
-@auth.route('/register' , methods=['POST'])
+@auth.route('/register', methods=['POST'])
 def register():
-    user = UserModel.from_json(request.get_json())
+    data = request.get_json()
+
+    if not data or not data.get("username") or not data.get("password"):
+        return jsonify({'message': 'missing_parameters'}), 400
+
+    user = UserModel.from_json(data)
     exists = db.session.query(UserModel).filter(UserModel.username == user.username).scalar() is not None
+
     if exists:
         return jsonify({'message': 'duplicated_username'}), 409
-    else:
-        try:
-            db.session.add(user)
-            db.session.commit()
-        except Exception as error:
-            db.session.rollback()
-            return str(error), 409
-        return jsonify({'message': 'registered','user_id': user.id}), 201
+    
+    try:
+        db.session.add(user)
+        db.session.commit()
+        return jsonify({'message': 'registered', 'user_id': user.id}), 201
+    except Exception as error:
+        db.session.rollback()
+        return jsonify({'message': str(error)}), 500
