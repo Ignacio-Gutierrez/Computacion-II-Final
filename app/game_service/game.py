@@ -29,10 +29,10 @@ class Connect_4:
                 if self.board[row][col] != ' ':
                     for direction, name in directions.items():
                         if self.check_direction(row, col, *direction):
-                            return f'El Jugador {self.board[row][col]} ganó con 4 en {name}'
+                            return f'El Jugador {self.board[row][col]} ganó con 4 en {name}. Desconectando...\n'
 
         if not any(' ' in row for row in self.board):
-            return 'Empate'
+            return 'Empate. Desconectando...\n'
 
         return True
 
