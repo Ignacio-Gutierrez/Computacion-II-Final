@@ -62,7 +62,7 @@ def telnet_client(username, password, action, ip_version):
 
                         clear_input_buffer()
 
-                        if 'ganó' in response or 'retirado del juego' in response:
+                        if 'ganó' in response or 'retirado del juego' in response or 'desconectado' in response:
                             break
 
                         while True:
@@ -100,7 +100,7 @@ def telnet_client(username, password, action, ip_version):
 
                         clear_input_buffer()
 
-                        if 'ganó' or 'retirado del juego' in response:
+                        if 'ganó' in response or 'retirado del juego' in response or 'desconectado' in response:
                             break
                         
                         while True:
