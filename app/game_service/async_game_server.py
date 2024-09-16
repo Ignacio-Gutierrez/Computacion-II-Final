@@ -180,18 +180,18 @@ async def start_game(player1, player2, game_sender, game_receiver):
 
         data = await current_player.reader.read(100)
         if not data:
-            opponent_player.writer.write(f"El jugador {current_player.name} se ha desconectado. Fin del juego.\n".encode())
+            opponent_player.writer.write(f"El jugador {current_player.username} se ha desconectado. Fin del juego.\n".encode())
             await opponent_player.writer.drain()
             break
 
         user_move = data.decode().strip()
 
         if user_move.lower() == "exit":
-                current_player.writer.write(f"Te has retirado del juego.\n".encode())
-                opponent_player.writer.write(f"El jugador {current_player.name} se ha retirado del juego.\n".encode())
-                await current_player.writer.drain()
-                await opponent_player.writer.drain()
-                break
+            current_player.writer.write(f"Te has retirado del juego.\n".encode())
+            opponent_player.writer.write(f"El jugador {current_player.username} se ha retirado del juego.\n".encode())
+            await current_player.writer.drain()
+            await opponent_player.writer.drain()
+            break
     
         try:
             valid_move = game.put_token(int(user_move))
