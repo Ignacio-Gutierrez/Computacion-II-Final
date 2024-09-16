@@ -89,14 +89,14 @@ def telnet_client(username, password, action, ip_version):
 
                 elif action == 'register':
                     
+                    if 'Desconectando' in response:
+                        c_s.send("exit".encode())
+                    else:
+                        print("Esperando a otro jugador...\n")
+
                     response = c_s.recv(1024).decode()
                     print(f"{response}")
-
-                    if "Usuario ya existe." in response:
-                        c_s.send("exit".encode())
-
-                    print("Esperando a otro jugador...\n")
-
+                    
                     while True:
                         response = c_s.recv(1024).decode()
                         response = response.replace('X', f"{colorama.Fore.CYAN + colorama.Style.BRIGHT}X{colorama.Style.RESET_ALL}")
