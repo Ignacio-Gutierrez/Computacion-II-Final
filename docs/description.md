@@ -50,7 +50,7 @@ La API utiliza **Flask** como framework para manejar las solicitudes HTTP y se c
                                                                 |  |   y de Partidas     |  |
                                                                 |  +---------------------+  |
                                                                 +---------------------------+
-
+```
 
 ## Nodos Principales:
 1. **Cliente**:
