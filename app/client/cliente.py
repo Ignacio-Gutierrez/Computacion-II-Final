@@ -62,16 +62,19 @@ def telnet_client(username, password, action, ip_version):
 
                         clear_input_buffer()
 
-                        if 'ganó' in response:
+                        if 'ganó' in response or 'Te has retirado del juego' in response:
                             break
 
-                        comando = input("--->  ")
-                        if comando.lower() == 'exit':
-                            break
+                        while True:
+                            comando = input("--->  ")
+                            if comando.lower() == 'exit':
+                                break
 
-                        if comando not in [str(i) for i in range(1, 9)]:
-                            print("Comando inválido, por favor ingresa un número entre 1 y 8")
-                            continue
+                            if comando in [str(i) for i in range(1, 9)]:
+                                break
+                            else:
+                                print("Comando inválido, por favor ingresa un número entre 1 y 8")
+                                continue
 
                         c_s.send(comando.encode())
 
@@ -97,17 +100,20 @@ def telnet_client(username, password, action, ip_version):
 
                         clear_input_buffer()
 
-                        if 'ganó' in response:
+                        if 'ganó' or 'Te has retirado del juego' in response:
                             break
+                        
+                        while True:
+                            comando = input("--->  ")
+                            if comando.lower() == 'exit':
+                                break
 
-                        comando = input("--->  ")
-                        if comando.lower() == 'exit':
-                            break
-
-                        if comando not in [str(i) for i in range(1, 9)]:
-                            print("Comando inválido, por favor ingresa un número entre 1 y 8")
-                            continue
-
+                            if comando in [str(i) for i in range(1, 9)]:
+                                break
+                            else:
+                                print("Comando inválido, por favor ingresa un número entre 1 y 8")
+                                continue
+                                
                         c_s.send(comando.encode())
 
                     print("Desconectando...")
@@ -122,14 +128,18 @@ def telnet_client(username, password, action, ip_version):
 
                         print(f"{colored_response}")
 
-                        print("\nPara salir escriba 'exit'")
-                        comando = input("Para cambiar de página, ingresa número de página: ")
+                        while True:
+                            print("\nPara salir escriba 'exit'")
+                            comando = input("Para cambiar de página, ingresa número de página: ")
+                            if comando.lower() == 'exit':
+                                c_s.send("exit".encode())
+                                break
+                            elif comando.isdigit():
+                                c_s.send(comando.encode())
+                                break                                       
+                        
                         if comando.lower() == 'exit':
-                            c_s.send("exit".encode())
                             break
-                        elif comando.isdigit():
-                            c_s.send(comando.encode())
-
                     print("Desconectando...")
 
             else:
