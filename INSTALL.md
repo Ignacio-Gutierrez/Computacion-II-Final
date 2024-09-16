@@ -55,7 +55,7 @@ Este comando ejecuta la API en `localhost` en el puerto `6666`.
 
 Crear archivo `config.ini` que contenga las configuraciones del servidor y de la API:
 
-    ```
+    ```ini
     [server]
     HOST = ::  
     PORT = 8888
@@ -82,7 +82,7 @@ si cambió `host`:`port` en la ejecución de la API o desea usar otros se debe m
 
 Crear archivo `config.ini` que contenga las configuraciones del servidor:
 
-    ```
+    ```ini
     [server]
     HOST = ::  
     PORT = 8888
