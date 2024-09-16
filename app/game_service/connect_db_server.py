@@ -20,19 +20,16 @@ def connect_to_db(db_sender, db_receiver):
             try:
                 if action == 'login':
                     response = requests.post(f'http://{host}:{port}/auth/login', json=data)
-                    response.raise_for_status()
                     response_data = response.json()
                     print(f"Respuesta de autenticación: {response_data}")
 
                 elif action == 'register':
                     response = requests.post(f'http://{host}:{port}/auth/register', json=data)
-                    response.raise_for_status()
                     response_data = response.json()
                     print(f"Respuesta de registro: {response_data}")
 
                 elif action == 'save_match':
                     response = requests.post(f'http://{host}:{port}/matches', json=data)
-                    response.raise_for_status()
                     response_data = response.json()
                     print(f"Respuesta de guardado de partida: {response_data}")
 
@@ -40,28 +37,12 @@ def connect_to_db(db_sender, db_receiver):
                     player = data['username']
                     page = data['page']
                     response = requests.get(f'http://{host}:{port}/matches?page={page}&player={player}')
-                    response.raise_for_status()
                     response_data = response.json()
                     print(f"Respuesta de historial de partidas: {response_data}")
 
-            except requests.HTTPError as e:
-                if response.status_code == 409:
-                    response_data = response.json()
-                    if response_data.get("message") == "duplicated_username":
-                        print("Error: nombre de usuario duplicado.")
-                        response_data = {"message": "duplicated_username"}
-                    else:
-                        print(f"Error desconocido: {e}")
-                        response_data = {"message": "error", "details": str(e)}
-                else:
-                    print(f"Error en la autenticación: {e}")
-                    response_data = {"message": "error", "details": str(e)}
-            except requests.RequestException as e:
-                print(f"Error en la autenticación: {e}")
-                response_data = {"message": "error", "details": str(e)}
-            except ValueError:
-                print("Respuesta inválida del servidor (no es JSON válido).")
-                response_data = {"message": "error", "details": "Invalid JSON response"}
+            except Exception as error:
+                print(f"Error en connect_to_db: {error}")
+                response_data = {'message': 'error', 'error': str(error)}
 
             db_sender.send(response_data)
             print(f"Respuesta enviada a async_game_server: {response_data}")
