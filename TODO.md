@@ -1,1 +1,20 @@
-contendrá una lista detallada de mejoras y posibles nuevas características/features del sistema para futuras versiones.
+# TODO - Cuatro en Línea
+
+Este archivo contiene una lista de posibles mejoras para futuras versiones del sistema **Cuatro en Línea**.
+
+## Mejoras Planeadas
+
+1. **Mejoras en la Interfaz del Cliente**
+   - Implementar una interfaz gráfica para el cliente en lugar de la línea de comandos.
+
+2. **Ampliación de la API**
+   - Añadir nuevas endpoints para características adicionales (por ejemplo, estadísticas de jugadores, rankings).
+   - Mejorar la seguridad de la API mediante autenticación y autorización más estrictas.
+
+## Nuevas Características
+
+1. **Modos de Juego Adicionales**
+   - Añadir soporte para diferentes variaciones del juego (por ejemplo, tableros de tamaño variable).
+
+2. **Soporte para Múltiples Idiomas**
+   - Añadir soporte para varios idiomas en la interfaz del cliente y mensajes del juego.
