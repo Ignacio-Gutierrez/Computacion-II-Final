@@ -74,13 +74,12 @@ class Matches(Resource):
         data = request.get_json()
         if not data:
             return {'message': 'No input data provided'}, 400
-
         try:
             match = MatchModel.from_json(data)
             db.session.add(match)
             db.session.commit()
-        except SQLAlchemyError as e:
+        except :
             db.session.rollback()
-            return {'message': str(e)}, 500
+            return {'message': 'error'}, 500
 
         return match.to_json(), 201
