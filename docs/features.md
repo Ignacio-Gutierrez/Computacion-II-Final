@@ -1,23 +1,34 @@
-# Funcionalidades de Cada Entidad
+# Funcionalidades por Entidad
 
 ## Cliente
-- **Registro de usuarios**: Permite a los usuarios crear una cuenta en el sistema.
-- **Inicio de sesión**: Autentica a los usuarios y obtiene un token JWT para acceder a las funcionalidades del juego.
-- **Búsqueda de partidas**: Permite a los usuarios buscar y unirse a partidas disponibles.
-- **Inicio de partidas**: Permite a los usuarios comenzar una nueva partida una vez que se han emparejado con un oponente.
-- **Interfaz del juego 4 en línea**: Proporciona la interfaz gráfica para jugar el juego "4 en línea".
-- **Enviar y recibir actualizaciones del estado del juego**: Permite al cliente enviar y recibir información en tiempo real sobre el estado de la partida.
+- **Conexión al Servidor:** Se conecta al servidor mediante sockets TCP.
+- **Autenticación y Registro:** Envía nombre de usuario y contraseña al servidor para autenticarse o registrarse.
+- **Envío de Jugadas:** Envía movimientos (columnas donde desea colocar fichas) al servidor.
+- **Recepción de Actualizaciones:** Recibe actualizaciones sobre el estado del tablero y el resultado del juego (ganador, empate, jugada inválida).
+- **Solicitar Historial:** Solicita y recibe el historial de partidas del jugador.
 
-## Servidor DB-Auth 
-- Gestión de registro de usuarios
-- Autenticación de usuarios
-- Almacenamiento de resultados de partidas en la base de datos
+## Servidor
+- **Gestión de Conexiones:** Acepta y maneja múltiples conexiones de clientes simultáneamente.
+- **Validación y Gestión de Jugadas:**
+  - Recibe y valida los movimientos enviados por los clientes.
+  - Actualiza el estado del juego en función de las jugadas.
+  - Verifica si hay un ganador o si el juego ha terminado en empate.
+  - Envía mensajes a los clientes sobre el estado del juego.
+- **Manejo de Partidas:**
+  - Mantiene una cola de jugadores esperando para jugar.
+  - Asigna jugadores a partidas cuando hay suficientes participantes (dos o más).
+- **Comunicación entre Procesos:**
+  - Utiliza pipes para comunicarse entre el proceso de lógica del juego y el proceso de consultas.
+- **Interacción con la API:**
+  - Realiza consultas a la API para validar usuarios.
+  - Envía resultados de partidas a la API para su almacenamiento en el historial.
+  - Consulta el historial de partidas de un jugador a la API.
 
-## Servidor  Game
-- Emparejamiento de jugadores
-- Manejo de la lógica del juego
-- Gestión de múltiples conexiones de clientes de forma concurrente
-
-## Base de Datos
-- **Almacenamiento de información de los usuarios**: Guarda detalles como nombre de usuario, contraseña (cifrada) y otros datos relacionados con los usuarios.
-- **Registro de historial de partidas**: Almacena el historial de partidas jugadas, incluyendo los jugadores involucrados, fecha y hora de cada partida, y los resultados (ganador y perdedor).
+## API para la Gestión de Usuarios
+- **Registro de Usuarios:**
+  - Permite la creación de nuevos usuarios.
+- **Autenticación de Usuarios:**
+  - Verifica las credenciales de los usuarios para permitirles acceder al juego.
+- **Almacenamiento de Datos:**
+  - Almacena el historial de partidas de los usuarios.
+  - Permite consultar el historial de partidas.
