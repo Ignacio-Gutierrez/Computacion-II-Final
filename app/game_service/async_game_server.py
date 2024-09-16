@@ -62,10 +62,14 @@ async def handle_client(reader, writer, game_sender, game_receiver):
         elif register_response.get("message") == "incorrect_password":
             writer.write("Contraseña incorrecta. Desconectando...\n".encode())
             await writer.drain()
+            writer.close()
+            await writer.wait_closed()
 
         elif register_response.get("message") == "user_not_found":
             writer.write("Usuario no encontrado. Desconectando...\n".encode())
             await writer.drain()
+            writer.close()
+            await writer.wait_closed()
 
     elif action == 'register':
         register_request = {'action': 'register', 'data': {'username': username, 'password': password}}
@@ -89,6 +93,9 @@ async def handle_client(reader, writer, game_sender, game_receiver):
         elif register_response.get("message") == "duplicated_username":
             writer.write("Usuario ya existe. Desconectando...\n".encode())
             await writer.drain()
+            writer.close()
+            await writer.wait_closed()
+
 
     elif action == 'historial':
         page = 1
@@ -180,7 +187,7 @@ async def start_game(player1, player2, game_sender, game_receiver):
 
         data = await current_player.reader.read(100)
         if not data:
-            opponent_player.writer.write(f"El jugador {current_player.username} se ha desconectado. Fin del juego.\n".encode())
+            opponent_player.writer.write(f"El jugador {current_player.username} se ha desconectado. Fin del juego.\n Desconectando...\n".encode())
             await opponent_player.writer.drain()
 
             # Guardar la partida con el jugador desconectado como perdedor
@@ -201,8 +208,8 @@ async def start_game(player1, player2, game_sender, game_receiver):
         user_move = data.decode().strip()
 
         if user_move.lower() == "exit":
-            current_player.writer.write(f"Te has retirado del juego.\n".encode())
-            opponent_player.writer.write(f"El jugador {current_player.username} se ha retirado del juego.\n".encode())
+            current_player.writer.write(f"Te has retirado del juego. Desconectando...\n".encode())
+            opponent_player.writer.write(f"El jugador {current_player.username} se ha retirado del juego. Desconectando...\n".encode())
             await current_player.writer.drain()
             await opponent_player.writer.drain()
 
