@@ -30,7 +30,7 @@ La API utiliza **Flask** como framework para manejar las solicitudes HTTP y se c
 
 
 # Gráfico de la Arquitectura
-
+```
 +----------------+         +-------------------------------------------------------------------+
 |    Cliente     |         |                                Servidor                           |
 |                |         |                                                                   |
