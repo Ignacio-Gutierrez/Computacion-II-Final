@@ -50,6 +50,7 @@ Para lanzar el servicio API Flask, ejecuta Gunicorn con el siguiente comando:
 
     Crear archivo `config.ini` que contenga las configuraciones del servidor y de la API:
 
+   ```bash
     [server]
     HOST = ::  
     PORT = 8888
@@ -57,7 +58,8 @@ Para lanzar el servicio API Flask, ejecuta Gunicorn con el siguiente comando:
     [api]
     HOST = localhost   
     PORT = 6666
-
+    ```
+    
     si cambió `host`:`port` en la ejecución de la API o desea usar otros se debe modificar acá
 
 2. Inicia el servidor de juego:
@@ -75,9 +77,11 @@ Para lanzar el servicio API Flask, ejecuta Gunicorn con el siguiente comando:
 
     Crear archivo `config.ini` que contenga las configuraciones del servidor:
 
+    ```bash
     [server]
     HOST = ::  
     PORT = 8888
+    ```
 
     si cambió `host`:`port` en la ejecución de la API o desea usar otros se debe modificar acá
 
