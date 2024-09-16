@@ -182,6 +182,20 @@ async def start_game(player1, player2, game_sender, game_receiver):
         if not data:
             opponent_player.writer.write(f"El jugador {current_player.username} se ha desconectado. Fin del juego.\n".encode())
             await opponent_player.writer.drain()
+
+            # Guardar la partida con el jugador desconectado como perdedor
+            finished_game = {
+                'action': 'save_match',
+                'data': {
+                    "player1_id": current_player.id,
+                    "player2_id": opponent_player.id,
+                    "game_date": datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),
+                    "winner_id": opponent_player.id,
+                    "loser_id": current_player.id
+                }
+            }
+            game_sender.send(finished_game)
+            game_receiver.recv()
             break
 
         user_move = data.decode().strip()
@@ -191,6 +205,20 @@ async def start_game(player1, player2, game_sender, game_receiver):
             opponent_player.writer.write(f"El jugador {current_player.username} se ha retirado del juego.\n".encode())
             await current_player.writer.drain()
             await opponent_player.writer.drain()
+
+            # Guardar la partida con el jugador retirado como perdedor
+            finished_game = {
+                'action': 'save_match',
+                'data': {
+                    "player1_id": current_player.id,
+                    "player2_id": opponent_player.id,
+                    "game_date": datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),
+                    "winner_id": opponent_player.id,
+                    "loser_id": current_player.id
+                }
+            }
+            game_sender.send(finished_game)
+            game_receiver.recv()
             break
     
         try:
@@ -230,12 +258,17 @@ async def start_game(player1, player2, game_sender, game_receiver):
                 }
             }
             game_sender.send(finished_game)
-            saved_game = game_receiver.recv()
-            
+            game_receiver.recv()
             break
 
         # Cambiar el turno al otro jugador
         turn = 1 - turn
+
+    # Cerrar las conexiones de los jugadores
+    player1.writer.close()
+    player2.writer.close()
+    await player1.writer.wait_closed()
+    await player2.writer.wait_closed()
 
 async def main(game_sender, game_receiver):
     addr = (host, port)
